@@ -1,0 +1,48 @@
+version: "3.5"
+
+networks:
+  secure:
+    name: secure
+
+services:
+  check-container-environment:
+    build: docker
+    container_name: check-container-environment
+    image: check-container-environment
+    restart: always
+    networks:
+      - secure
+    volumes:
+      - ./volumes/check-container-environment:/var/upload
+    #user: manager
+    environment:
+      - DATABASE_USERNAME=sa
+      - DATABASE_PASSWORD=Password1234%
+      - DATABASE_SERVERNAME=mssql\\sqlexpress
+      - DATABASE_PORT=1433
+      - DATABASE_DATABASE=master
+      - MEMCACHED_HOSTNAME=memcached
+    #  - APACHE_RUN_USER=manager
+    #  - APACHE_RUN_GROUP=manager
+    ports:
+      - '8080:80'
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2017-CU24-ubuntu-16.04
+    container_name: mssql
+    volumes:
+      - ./volumes/mssql:/var/opt/mssql
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Password1234%
+      - MSSQL_PID=Express
+    #ports:
+    #  - "60007:1433"
+    networks:
+      - secure
+  memcached:
+    image: memcached:1.5-alpine
+    container_name: memcached
+    restart: always
+    networks:
+      - secure
+  
