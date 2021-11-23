@@ -10,6 +10,12 @@ services:
     container_name: check-container-environment
     image: check-container-environment
     restart: always
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run
+      - /run/apache2
+      - /run/lock
     networks:
       - secure
     volumes:
@@ -18,7 +24,7 @@ services:
     environment:
       - DATABASE_USERNAME=sa
       - DATABASE_PASSWORD=Password1234%
-      - DATABASE_SERVERNAME=mssql\\sqlexpress
+      - DATABASE_SERVERNAME=mssql\\mssql
       - DATABASE_PORT=1433
       - DATABASE_DATABASE=master
       - MEMCACHED_HOSTNAME=memcached
@@ -26,11 +32,13 @@ services:
     #  - APACHE_RUN_GROUP=manager
     ports:
       - '8080:80'
+    depends_on:
+      - mssql
   mssql:
     image: mcr.microsoft.com/mssql/server:2017-CU24-ubuntu-16.04
     container_name: mssql
     volumes:
-      - ./volumes/mssql:/var/opt/mssql
+      - ./volumes/mssql:/var/opt/mssql/data
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Password1234%
@@ -45,4 +53,3 @@ services:
     restart: always
     networks:
       - secure
-  
